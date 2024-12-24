@@ -10,6 +10,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required for creating releases
 
     steps:
     - name: Checkout code
@@ -18,7 +20,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.27.1'  # Use a specific Flutter version instead of 'stable'
+        flutter-version: '3.27.1'
 
     - name: Verify Flutter installation
       run: flutter --version
@@ -29,12 +31,25 @@ jobs:
     - name: Build APK
       run: flutter build apk --release
 
+    # Create the release first
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref_name }}
+        release_name: Release ${{ github.ref_name }}
+        draft: false
+        prerelease: false
+
+    # Then upload the asset
     - name: Upload APK to release
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ github.event.release.upload_url }}
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: build/app/outputs/flutter-apk/app-release.apk
         asset_name: Number_Guessing_Game.apk
         asset_content_type: application/vnd.android.package-archive
