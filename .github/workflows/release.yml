@@ -38,8 +38,10 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref_name }}
-        release_name: Release ${{ github.ref_name }}
+        tag_name: v1.0.1
+        release_name: Number Guessing Game v1.0.1
+        body: |
+          Number Guessing Game - Release v1.0.1
         draft: false
         prerelease: false
 
